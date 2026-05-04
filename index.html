@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFPD - Police Academy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+  :root {
+    --bg:#0f1117; --card:#171c2a; --card2:#1e2438; --border:#2a3050;
+    --gold:#c9a84c; --gold-light:#e2c06a; --gold-dim:rgba(201,168,76,0.15);
+    --text:#d8dde8; --text-muted:#6b7592;
+    --green:#3aad6e; --green-dim:rgba(58,173,110,0.12);
+    --red:#e05050; --red-dim:rgba(224,80,80,0.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Source Sans 3',sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:40px 16px 60px;
+    background-image:radial-gradient(ellipse at 20% 0%,rgba(74,127,212,0.07) 0%,transparent 60%),
+                     radial-gradient(ellipse at 80% 100%,rgba(201,168,76,0.06) 0%,transparent 60%);
+  }
+  .badge-wrap{text-align:center;margin-bottom:12px;}
+  .badge-wrap svg{width:80px;height:80px;filter:drop-shadow(0 0 12px rgba(201,168,76,0.4));}
+  .title-block{text-align:center;margin-bottom:24px;}
+  .dept{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;letter-spacing:4px;color:var(--gold);line-height:1;}
+  .sub{font-family:'Oswald',sans-serif;font-size:18px;font-weight:600;letter-spacing:3px;color:var(--text);margin-top:2px;}
+  .exam-label{font-size:13px;letter-spacing:2px;color:var(--text-muted);margin-top:6px;}
+
+  .tabs-wrap{width:100%;max-width:680px;margin-bottom:20px;}
+  .nav-tabs{display:flex;background:var(--card2);border-radius:10px;padding:4px;border:1px solid var(--border);}
+  .nav-tab{
+    flex:1;text-align:center;padding:11px;border-radius:8px;cursor:pointer;
+    font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;font-weight:600;
+    color:var(--text-muted);transition:all .2s;user-select:none;
+  }
+  .nav-tab.active{background:var(--gold);color:#1a1400;}
+  .nav-tab:hover:not(.active){color:var(--text);}
+
+  .wrap{width:100%;max-width:680px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:36px 40px;width:100%;}
+
+  .label-field{font-size:11px;font-weight:600;letter-spacing:2px;color:var(--gold);margin-bottom:8px;text-transform:uppercase;}
+  .nick-hint{font-size:12px;color:var(--text-muted);margin-top:-18px;margin-bottom:18px;}
+  .nick-hint span{color:var(--gold);}
+  input[type="text"]{
+    width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;
+    color:var(--text);font-size:15px;font-family:'Source Sans 3',sans-serif;
+    padding:12px 16px;outline:none;transition:border-color .2s;margin-bottom:10px;
+  }
+  input[type="text"]:focus{border-color:var(--gold);}
+  input[type="text"]::placeholder{color:var(--text-muted);}
+
+  .progress-bar-wrap{background:var(--border);border-radius:4px;height:4px;margin-bottom:16px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:4px;transition:width .4s ease;}
+  .progress-text{font-size:12px;color:var(--text-muted);letter-spacing:1px;margin-bottom:20px;}
+
+  .q-block{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:22px 24px;margin-bottom:14px;transition:border-color .2s;}
+  .q-tag{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+  .q-text{font-size:15px;font-weight:500;line-height:1.55;color:var(--text);margin-bottom:16px;}
+  .option{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card);border:1px solid var(--border);border-radius:8px;
+    padding:11px 15px;margin-bottom:8px;cursor:pointer;
+    transition:border-color .15s,background .15s;font-size:14px;color:var(--text);user-select:none;
+  }
+  .option:hover{border-color:var(--gold);background:var(--gold-dim);}
+  .option.selected{border-color:var(--gold);background:var(--gold-dim);color:var(--gold-light);}
+  .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--text-muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .option.selected .dot{border-color:var(--gold);background:var(--gold);}
+  .option.selected .dot::after{content:'';width:6px;height:6px;background:#fff;border-radius:50%;}
+
+  .btn{
+    background:var(--gold);color:#1a1400;font-family:'Oswald',sans-serif;
+    font-size:15px;font-weight:600;letter-spacing:2px;padding:13px 32px;
+    border:none;border-radius:8px;cursor:pointer;transition:background .2s,transform .1s;text-transform:uppercase;
+  }
+  .btn:hover{background:var(--gold-light);transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn-outline{
+    background:transparent;color:var(--gold);border:1px solid var(--gold);
+    font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;letter-spacing:2px;
+    padding:11px 24px;border-radius:8px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+  }
+  .btn-outline:hover{background:var(--gold-dim);}
+
+  .warning-box{
+    display:none;color:var(--red);font-size:13px;font-weight:500;
+    margin:12px 0 8px;padding:10px 14px;
+    background:var(--red-dim);border:1px solid rgba(224,80,80,0.4);border-radius:8px;
+  }
+
+  /* RESULT */
+  .result-card{text-align:center;padding:8px 0;}
+  .result-name-txt{font-size:15px;color:var(--text-muted);margin-bottom:4px;letter-spacing:1px;}
+  .result-score-txt{font-size:54px;font-weight:700;color:var(--gold);font-family:'Oswald',sans-serif;line-height:1;margin:10px 0 4px;}
+  .result-sub-txt{font-size:13px;color:var(--text-muted);margin-bottom:12px;letter-spacing:1px;}
+  .result-verdict-txt{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;letter-spacing:4px;margin-bottom:6px;}
+  .verdict-pass{color:var(--green);}
+  .verdict-fail{color:var(--red);}
+  .result-note-txt{font-size:13px;color:var(--text-muted);line-height:1.6;max-width:420px;margin:0 auto 20px;}
+  .stat-row{display:flex;justify-content:center;gap:48px;margin:14px 0 22px;}
+  .stat-item{text-align:center;}
+  .stat-num{font-family:'Oswald',sans-serif;font-size:30px;font-weight:600;}
+  .stat-num.ok{color:var(--green);}
+  .stat-num.err{color:var(--red);}
+  .stat-label{font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-top:2px;}
+
+  /* BOARD */
+  .board-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .board-title{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;letter-spacing:3px;color:var(--gold);}
+  .board-subtitle{font-size:12px;color:var(--text-muted);margin-top:3px;letter-spacing:1px;}
+  .filter-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .filter-btn{
+    background:var(--card2);border:1px solid var(--border);color:var(--text-muted);
+    font-size:12px;font-family:'Oswald',sans-serif;letter-spacing:1px;
+    padding:7px 16px;border-radius:6px;cursor:pointer;transition:all .2s;
+  }
+  .filter-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-dim);}
+
+  table.board-table{width:100%;border-collapse:collapse;}
+  table.board-table th{
+    font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;
+    color:var(--text-muted);text-transform:uppercase;padding:10px 12px;
+    text-align:left;border-bottom:1px solid var(--border);
+  }
+  table.board-table td{padding:13px 12px;font-size:14px;border-bottom:1px solid rgba(42,48,80,0.5);vertical-align:middle;}
+  table.board-table tr:last-child td{border-bottom:none;}
+  table.board-table tbody tr:hover td{background:rgba(255,255,255,0.02);}
+  .rank-num{font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--text-muted);}
+  .nick-cell{font-weight:600;color:var(--text);}
+  .score-cell{font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;color:var(--gold);}
+  .date-cell{font-size:12px;color:var(--text-muted);line-height:1.5;}
+  .status-badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:1px;font-family:'Oswald',sans-serif;}
+  .status-pass{background:var(--green-dim);color:var(--green);border:1px solid rgba(58,173,110,0.4);}
+  .status-fail{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,80,80,0.4);}
+  .del-btn{
+    background:transparent;border:1px solid rgba(224,80,80,0.3);color:var(--red);
+    border-radius:6px;padding:4px 9px;cursor:pointer;font-size:12px;transition:all .2s;
+  }
+  .del-btn:hover{background:var(--red-dim);border-color:var(--red);}
+
+  /* ADMIN MODAL */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+    z-index:1000;align-items:center;justify-content:center;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:32px;width:100%;max-width:380px;text-align:center;
+  }
+  .modal-title{font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold);margin-bottom:8px;}
+  .modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px;}
+  .modal-input{
+    width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;
+    color:var(--text);font-size:15px;font-family:'Source Sans 3',sans-serif;
+    padding:11px 14px;outline:none;transition:border-color .2s;margin-bottom:12px;text-align:center;
+    letter-spacing:4px;
+  }
+  .modal-input:focus{border-color:var(--gold);}
+  .modal-error{font-size:12px;color:var(--red);margin-bottom:12px;display:none;}
+  .modal-btns{display:flex;gap:10px;justify-content:center;}
+
+  .empty-board{text-align:center;padding:52px 0;color:var(--text-muted);font-size:14px;}
+  .loading-row{text-align:center;padding:36px;color:var(--text-muted);font-size:13px;}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .hidden{display:none!important;}
+  .desc{font-size:15px;color:var(--text-muted);margin-bottom:18px;line-height:1.6;}
+  .q-count{font-size:13px;color:var(--text-muted);margin-bottom:24px;letter-spacing:1px;}
+</style>
+</head>
+<body>
+
+<!-- BADGE -->
+<div class="badge-wrap">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="#c9a84c" opacity="0.9"/>
+    <polygon points="50,12 59,37 86,37 65,54 73,82 50,66 27,82 35,54 14,37 41,37" fill="#1e2438"/>
+    <circle cx="50" cy="50" r="22" fill="none" stroke="#c9a84c" stroke-width="2"/>
+    <text x="50" y="45" text-anchor="middle" font-family="Oswald,sans-serif" font-size="8" fill="#c9a84c" font-weight="700">SAN</text>
+    <text x="50" y="54" text-anchor="middle" font-family="Oswald,sans-serif" font-size="8" fill="#c9a84c" font-weight="700">FRANCISCO</text>
+    <text x="50" y="63" text-anchor="middle" font-family="Oswald,sans-serif" font-size="6.5" fill="#c9a84c">POLICE</text>
+  </svg>
+</div>
+
+<div class="title-block">
+  <div class="dept">SFPD</div>
+  <div class="sub">POLICE ACADEMY</div>
+  <div class="exam-label">Теоретический экзамен</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="nav-tabs">
+    <div class="nav-tab active" id="tab-quiz" onclick="showPage('quiz')">ТЕСТ</div>
+    <div class="nav-tab" id="tab-board" onclick="showPage('board')">РЕЗУЛЬТАТЫ</div>
+  </div>
+</div>
+
+<!-- ════ QUIZ SECTION ════ -->
+<div class="wrap" id="quiz-section">
+
+  <!-- START PAGE -->
+  <div class="card" id="start-page">
+    <p class="desc">Пройдите теоретический тест для дальнейшего прохождения полицейской академии.</p>
+    <div class="q-count">13 вопросов · Допускается не более 2 ошибок</div>
+    <div class="label-field">Ваш игровой никнейм</div>
+    <input type="text" id="nickname-input" placeholder="Например: Mayk_Fyurze" maxlength="32" oninput="this.value=this.value.replace(/ /g,'_')">
+    <div class="nick-hint" style="margin-top:8px;margin-bottom:0;">Используйте нижнее подчёркивание: <span>Имя_Фамилия</span></div>
+    <button class="btn" onclick="startQuiz()" style="margin-top:14px">Начать тест</button>
+  </div>
+
+  <!-- QUIZ PAGE -->
+  <div class="card hidden" id="quiz-page">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-text" id="progress-text">Отвечено: 0 / 13</div>
+    <div id="questions-container"></div>
+    <div class="warning-box" id="submit-warning"></div>
+    <button class="btn" onclick="submitQuiz()" style="margin-top:8px">Отправить тест</button>
+  </div>
+
+  <!-- RESULT PAGE -->
+  <div class="card hidden" id="result-page">
+    <div class="result-card">
+      <div class="result-name-txt" id="r-name"></div>
+      <div class="result-score-txt" id="r-score"></div>
+      <div class="result-sub-txt" id="r-sub"></div>
+      <div class="result-verdict-txt" id="r-verdict"></div>
+      <div class="stat-row">
+        <div class="stat-item"><div class="stat-num ok" id="r-ok"></div><div class="stat-label">ВЕРНО</div></div>
+        <div class="stat-item"><div class="stat-num err" id="r-err"></div><div class="stat-label">ОШИБОК</div></div>
+      </div>
+      <div class="result-note-txt" id="r-note"></div>
+      <button class="btn" onclick="resetQuiz()">Пройти заново</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════ BOARD SECTION ════ -->
+<div class="card hidden" id="board-section" style="width:100%;max-width:680px;">
+  <div class="board-header">
+    <div>
+      <div class="board-title">ТАБЛИЦА РЕЗУЛЬТАТОВ</div>
+      <div class="board-subtitle">SFPD POLICE ACADEMY · ТЕОРЕТИЧЕСКИЙ ЭКЗАМЕН</div>
+    </div>
+    <button class="btn-outline" onclick="loadBoard()" style="padding:8px 18px;font-size:13px;">Обновить</button>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all',this)">Все</button>
+    <button class="filter-btn" onclick="setFilter('pass',this)">Сдали</button>
+    <button class="filter-btn" onclick="setFilter('fail',this)">Не сдали</button>
+  </div>
+  <div id="board-content">
+    <div class="loading-row"><span class="spinner"></span>Загрузка...</div>
+  </div>
+</div>
+
+<!-- ADMIN PASSWORD MODAL -->
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal-box">
+    <div class="modal-title">ДОСТУП АДМИНИСТРАТОРА</div>
+    <div class="modal-sub">Введите пароль для удаления записи</div>
+    <input type="password" class="modal-input" id="admin-pass" placeholder="••••••">
+    <div class="modal-error" id="modal-error">Неверный пароль</div>
+    <div class="modal-btns">
+      <button class="btn-outline" onclick="closeModal()">Отмена</button>
+      <button class="btn" onclick="confirmDelete()">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB_LKtoVJr35dj4UYIOq6oredtfBAqdc4A",
+    authDomain: "sfpd-academy.firebaseapp.com",
+    databaseURL: "https://sfpd-academy-default-rtdb.firebaseio.com",
+    projectId: "sfpd-academy",
+    storageBucket: "sfpd-academy.firebasestorage.app",
+    messagingSenderId: "277737768605",
+    appId: "1:277737768605:web:3952a9de673bcdcbd27674",
+    measurementId: "G-588FDXG6JS"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  window._db         = db;
+  window._addDoc     = (col, data) => addDoc(collection(db, col), data);
+  window._getDocs    = (col) => getDocs(collection(db, col));
+  window._deleteDoc  = (col, id) => deleteDoc(doc(db, col, id));
+
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
+
+<script>
+// ════ QUESTIONS ════
+const QUESTIONS = [
+  { tag:"АК", text:"Максимальная сумма штрафа",
+    options:["70.000 $","150.000 $","170.000 $","200.000 $","Нет ограничений"], answer:1 },
+  { tag:"АК", text:"Сотрудник остановил авто, предъявил обвинение в АК 7.1 и выдал штрафной бланк, человек отказался оплачивать штраф",
+    options:["Не регламентируется действующим законом","Арест за неподчинение","Арест за попытку ухода от сотрудников ПО","Разрешается отпустить на свое усмотрение","Изъятие водительских прав"], answer:4 },
+  { tag:"АК", text:"Стоять на крыше транспортного средства просто так и не представлять никакой опасности (просто стоять молча)",
+    options:["Не является нарушением","Является нарушением, требует отправки (/report)","Является административным правонарушением и наказывается по УК","Является административным правонарушением и наказывается по АК"], answer:3 },
+  { tag:"УК", text:"Статус ООП, что означает?",
+    options:["ООП - человек, совершивший любое преступление","ООП - человек, совершивший любое преступление против здоровья граждан","ООП - человек, совершивший любое преступление против имущества граждан","ООП - человек, совершивший любое преступление против здоровья и имущества граждан","ООП - человек, обвиненный по определенным, выделенным преступлениям действующего законодательства","ООП - человек, имеющий уровень розыска 4 и более"], answer:4 },
+  { tag:"УК", text:"Человек проник на территорию военной части и начал вести огонь по солдатам, никого не убил",
+    options:["Уровень розыска 6 + ООП статус","Уровень розыска 6","Уровень розыска 5 + ООП статус","Уровень розыска 5","Уровень розыска 4 + ООП статус"], answer:4 },
+  { tag:"УК", text:"Хранение наркотических средств у гражданских лиц",
+    options:["Уровень розыска 3 и вызов сотрудников DEA FBI","Уровень розыска 3","Уровень розыска 3 и изъятие веществ","Уровень розыска 2 и вызов сотрудников DEA FBI","Уровень розыска 2"], answer:2 },
+  { tag:"ФП", text:"Офицер SAPD увидел нарушение со стороны агента ФБР, который был в маскировке и не предъявил удостоверение. Офицер объявил его в розыск. Что нарушил офицер?",
+    options:["ФП 2.9","Ничего не нарушил","ФП 4.2","ФП 4.8"], answer:1 },
+  { tag:"ФП", text:"Сотрудник SAPD в нерабочее время, без формы, устроил драку с гражданским. Что он нарушил?",
+    options:["ФП 1.1","ФП 4.15","ФП 1.1 и ФП 4.15","Ничего — он был не при исполнении"], answer:2 },
+  { tag:"ФП", text:"Офицер задержал сотрудника армии за нарушение без согласования с ФБР. Сейчас 14:00, агенты FBI в сети. Что нарушил офицер?",
+    options:["ФП 4.7","ФП 4.20","ФП 1.3","ФП 4.20 и ФП 1.3"], answer:3 },
+  { tag:"УСТАВ", text:"Время работы департамента в будние дни (ПН-ПТ)",
+    options:["с 10:00 до 21:00","с 10:00 до 18:00","С 10:00 до 20:00","С 11:00 до 23:00"], answer:0 },
+  { tag:"УСТАВ", text:"Разрешается ли сон в душевой на первом этаже?",
+    options:["Да","Нет","Только по выходным дням"], answer:1 },
+  { tag:"УСТАВ", text:"Использование личного транспорта разрешается ли Старшими Офицерами?",
+    options:["Всеми Старшими Офицерами разрешается","Всеми Полковниками разрешается","Только Шерифом"], answer:0 },
+  { tag:"УСТАВ", text:"Дресс-код в департаменте обязателен к выполнению и не допускается самовольно выбирать себе форму",
+    options:["Да","Нет","Руководства отделов сами выбирают, в какой форме ходят их сотрудники"], answer:2 }
+];
+
+// ════ STATE ════
+const ADMIN_PASSWORD = "SFPD2026";
+let userAnswers   = {};
+let nickname      = "";
+let currentFilter = 'all';
+let allResults    = [];
+let pendingDeleteId = null;
+
+// ════ NAV ════
+function showPage(page) {
+  document.getElementById('tab-quiz').classList.toggle('active', page === 'quiz');
+  document.getElementById('tab-board').classList.toggle('active', page === 'board');
+  document.getElementById('quiz-section').classList.toggle('hidden', page !== 'quiz');
+  document.getElementById('board-section').classList.toggle('hidden', page !== 'board');
+  if (page === 'board') loadBoard();
+}
+
+// ════ START ════
+function startQuiz() {
+  const val = document.getElementById('nickname-input').value.trim();
+  if (!val) { alert('Введите ваш игровой никнейм!'); return; }
+  if (!val.includes('_')) { alert('Никнейм должен содержать нижнее подчёркивание!\nПример: Mayk_Fyurze'); return; }
+  if (!/^[a-zA-Zа-яА-ЯёЁ0-9_]+$/.test(val)) { alert('Никнейм может содержать только буквы, цифры и _'); return; }
+  nickname = val;
+  document.getElementById('start-page').classList.add('hidden');
+  document.getElementById('quiz-page').classList.remove('hidden');
+  renderQuestions();
+}
+
+// ════ RENDER QUESTIONS ════
+function renderQuestions() {
+  userAnswers = {};
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const block = document.createElement('div');
+    block.className = 'q-block';
+    block.id = 'qb-' + qi;
+    block.style.animation = 'fadeIn .3s ease';
+    block.innerHTML = `<div class="q-tag">Вопрос ${qi+1} — ${q.tag}</div><div class="q-text">${q.text}</div>`;
+    q.options.forEach((opt, oi) => {
+      const div = document.createElement('div');
+      div.className = 'option';
+      div.innerHTML = `<span class="dot"></span><span>${opt}</span>`;
+      div.onclick = () => {
+        block.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+        div.classList.add('selected');
+        block.style.border = '1px solid var(--border)';
+        userAnswers[qi] = oi;
+        updateProgress();
+      };
+      block.appendChild(div);
+    });
+    container.appendChild(block);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(userAnswers).length;
+  document.getElementById('progress-text').textContent = `Отвечено: ${answered} / ${QUESTIONS.length}`;
+  document.getElementById('progress-fill').style.width = (answered / QUESTIONS.length * 100) + '%';
+}
+
+// ════ SUBMIT ════
+function submitQuiz() {
+  const unanswered = QUESTIONS.map((_,qi) => userAnswers[qi] === undefined ? qi : null).filter(x => x !== null);
+  if (unanswered.length > 0) {
+    unanswered.forEach(qi => document.getElementById('qb-'+qi).style.border = '1px solid var(--red)');
+    document.getElementById('qb-'+unanswered[0]).scrollIntoView({behavior:'smooth', block:'center'});
+    const w = document.getElementById('submit-warning');
+    w.textContent = `Ответьте на все вопросы. Пропущены: ${unanswered.map(i=>i+1).join(', ')}`;
+    w.style.display = 'block';
+    return;
+  }
+  document.getElementById('submit-warning').style.display = 'none';
+
+  let correct = 0;
+  QUESTIONS.forEach((q, qi) => { if (userAnswers[qi] === q.answer) correct++; });
+
+  const total  = QUESTIONS.length;
+  const errors = total - correct;
+  const pass   = errors < 3;
+
+  saveResult(nickname, correct, total, pass);
+  showResult(nickname, correct, total, pass);
+}
+
+// ════ SHOW RESULT ════
+function showResult(nick, score, total, pass) {
+  document.getElementById('quiz-page').classList.add('hidden');
+  document.getElementById('result-page').classList.remove('hidden');
+
+  const errors = total - score;
+  document.getElementById('r-name').textContent    = nick;
+  document.getElementById('r-score').textContent   = score + ' / ' + total;
+  document.getElementById('r-sub').textContent     = 'правильных ответов из ' + total;
+  document.getElementById('r-ok').textContent      = score;
+  document.getElementById('r-err').textContent     = errors;
+
+  const verdict = document.getElementById('r-verdict');
+  verdict.textContent = pass ? 'ЭКЗАМЕН СДАН' : 'ЭКЗАМЕН НЕ СДАН';
+  verdict.className   = 'result-verdict-txt ' + (pass ? 'verdict-pass' : 'verdict-fail');
+
+  document.getElementById('r-note').textContent = pass
+    ? 'Поздравляем! Вы успешно прошли теоретический экзамен SFPD Police Academy.'
+    : `К сожалению, допускается не более 2 ошибок. У вас ${errors} ${errors===1?'ошибка':'ошибок'}. Рекомендуем повторить материал и пройти тест снова.`;
+}
+
+// ════ FIREBASE SAVE ════
+async function saveResult(nick, score, total, pass) {
+  try {
+    if (!window._db) return;
+    await window._addDoc('results', {
+      nickname: nick, score, total, pass, errors: total - score, timestamp: new Date()
+    });
+  } catch(e) { console.warn('Save error:', e); }
+}
+
+// ════ LEADERBOARD ════
+async function loadBoard() {
+  const el = document.getElementById('board-content');
+  el.innerHTML = '<div class="loading-row"><span class="spinner"></span>Загрузка данных...</div>';
+  try {
+    if (!window._db) { el.innerHTML = '<div class="empty-board">Firebase не подключён</div>'; return; }
+    const snap = await window._getDocs('results');
+    allResults = [];
+    snap.forEach(doc => { const d = doc.data(); d._id = doc.id; allResults.push(d); });
+    renderBoard();
+  } catch(e) {
+    el.innerHTML = `<div class="empty-board">Ошибка: ${e.message}</div>`;
+  }
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBoard();
+}
+
+function renderBoard() {
+  const el   = document.getElementById('board-content');
+  let data   = allResults;
+  if (currentFilter === 'pass') data = data.filter(r => r.pass);
+  if (currentFilter === 'fail') data = data.filter(r => !r.pass);
+
+  if (data.length === 0) {
+    el.innerHTML = '<div class="empty-board">Результатов пока нет</div>';
+    return;
+  }
+
+  const sorted = [...data].sort((a,b) => b.score - a.score || a.errors - b.errors);
+
+  let html = `<table class="board-table"><thead><tr>
+    <th>#</th><th>Никнейм</th><th>Результат</th><th>Ошибки</th><th>Дата</th><th>Статус</th><th></th>
+  </tr></thead><tbody>`;
+
+  sorted.forEach((r, i) => {
+    const ts      = r.timestamp?.toDate ? r.timestamp.toDate() : (r.timestamp?.seconds ? new Date(r.timestamp.seconds*1000) : new Date());
+    const dateStr = ts.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const timeStr = ts.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    const errCol  = r.errors > 0 ? 'var(--red)' : 'var(--green)';
+
+    html += `<tr>
+      <td><span class="rank-num">${i+1}</span></td>
+      <td><span class="nick-cell">${r.nickname}</span></td>
+      <td><span class="score-cell">${r.score}/${r.total}</span></td>
+      <td style="font-weight:600;color:${errCol}">${r.errors}</td>
+      <td><div class="date-cell">${dateStr}<br>${timeStr}</div></td>
+      <td><span class="status-badge ${r.pass?'status-pass':'status-fail'}">${r.pass?'СДАЛ':'НЕ СДАЛ'}</span></td>
+      <td><button class="del-btn" onclick="askDelete('${r._id}')">X</button></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+// ════ ADMIN DELETE ════
+function askDelete(docId) {
+  pendingDeleteId = docId;
+  document.getElementById('admin-pass').value = '';
+  document.getElementById('modal-error').style.display = 'none';
+  document.getElementById('admin-modal').classList.add('show');
+  setTimeout(() => document.getElementById('admin-pass').focus(), 100);
+}
+
+function closeModal() {
+  pendingDeleteId = null;
+  document.getElementById('admin-modal').classList.remove('show');
+}
+
+async function confirmDelete() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass !== ADMIN_PASSWORD) {
+    document.getElementById('modal-error').style.display = 'block';
+    document.getElementById('admin-pass').value = '';
+    return;
+  }
+  try {
+    await window._deleteDoc('results', pendingDeleteId);
+    closeModal();
+    loadBoard();
+  } catch(e) {
+    alert('Ошибка удаления: ' + e.message);
+  }
+}
+
+// Enter key in modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('admin-modal').classList.contains('show')) {
+    confirmDelete();
+  }
+  if (e.key === 'Escape') closeModal();
+});
+
+// ════ RESET ════
+function resetQuiz() {
+  userAnswers = {};
+  nickname = '';
+  document.getElementById('nickname-input').value = '';
+  document.getElementById('result-page').classList.add('hidden');
+  document.getElementById('start-page').classList.remove('hidden');
+}
+
+window.addEventListener('firebase-ready', () => { /* ready */ });
+</script>
+</body>
+</html>
